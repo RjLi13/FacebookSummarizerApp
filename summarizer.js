@@ -42,11 +42,12 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 	            }
 	            // I'm not sure when to split a sentence. Whether by punctuation enders or the end of a message
 	            // For now its the end of a message
-	            rawText.push(event.body)
+	            var msg = event.body.split(".");
+	            rawText.push(msg);
 	            break;
 	        case "event":
-	            rawText.push(event.logMessageType)
-	            rawText.push(event.logMessageBody)
+	            rawText.push(event.logMessageType);
+	            rawText.push(event.logMessageBody);
 	            break;
         }
     });
