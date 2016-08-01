@@ -6,11 +6,11 @@ exports.summarizeText = function summarizeText(rawText) {
 		var result = "";
 		var textToSum = [];
 		for (var item in rawText) {
-			textToSum.push(summarizeParagraph(rawText[item]));
+			textToSum.push.apply(textToSum, summarizeParagraph(rawText[item]));
 		}
 		var resultsArr = summarizeHelper(textToSum, Math.floor(textToSum.length / 3));
-		for (var sumSent in resultsArr) {
-			result += resultsArr[sumSent];
+		for (var i = 0; i < resultsArr.length; i++) {
+			result += resultsArr[i];
 			result += "\n";
 		}
 		return result;
@@ -20,12 +20,12 @@ exports.summarizeText = function summarizeText(rawText) {
 }
 
 function summarizeParagraph(paragraph) {
-	var sentences = paragraph.split(/[\\.!?]/);
+	var sentences = paragraph.split(/[\\.!?]/).filter(Boolean);
 	// console.log("Sentences Array is: " + sentences);
-	if (sentences.length < 2) {
-		return paragraph;
+	if (sentences.length < 3) {
+		return sentences;
 	}
-	return summarizeHelper(sentences, 1)[0];
+	return summarizeHelper(sentences, 2);
 }
 
 function summarizeHelper(sentences, x) {
@@ -49,17 +49,17 @@ function summarizeHelper(sentences, x) {
 	});
 
 	var newArr = items.slice(0, x);
-	console.log("newArr " + newArr);
+	// console.log("newArr " + newArr);
 	var resultArr = [];
-	for (var miniArr in newArr) {
-		resultArr.push(newArr[miniArr][0]);
+	for (var i = 0; i < newArr.length; i++) {
+		resultArr.push(newArr[i][0]);
 	}
 	return resultArr;
 }
 
 function calculateIntersect(sentence1, sentence2) {
-	var wordsArr1 = sentence1.split(" ");
-	var wordsArr2 = sentence2.split(" ");
+	var wordsArr1 = sentence1.split(/[ ,]+/).filter(Boolean);
+	var wordsArr2 = sentence2.split(/[ ,]+/).filter(Boolean);
 	// console.log("wordsArr1 unsorted: " + wordsArr1);
 	// console.log("wordsArr2 unsorted: " + wordsArr2);
 	wordsArr1 = mergeSort(wordsArr1);
