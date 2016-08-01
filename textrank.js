@@ -2,14 +2,16 @@
 
 exports.summarizeText = function summarizeText(rawText) {
 	try{
+		console.log("text to summarize: " + rawText);
 		var result = "";
 		var textToSum = [];
 		for (var item in rawText) {
-			textToSum.push(summarizeParagraph(item));
+			textToSum.push(summarizeParagraph(rawText[item]));
 		}
 		var resultsArr = summarizeHelper(textToSum, Math.floor(textToSum.length / 3));
 		for (var sumSent in resultsArr) {
-			result += sumSent;
+			result += resultsArr[sumSent];
+			result += ". ";
 		}
 		return result;
 	} catch(err) {
@@ -19,21 +21,23 @@ exports.summarizeText = function summarizeText(rawText) {
 
 function summarizeParagraph(paragraph) {
 	var sentences = paragraph.split(".");
+	console.log("Sentences Array is: " + sentences);
 	if (sentences.length < 2) {
 		return paragraph;
 	}
 	return summarizeHelper(sentences, 1)[0];
+}
 
 function summarizeHelper(sentences, x) {
 	var sentDict = {};
 	for (var sentence1 in sentences) {
 		var score = 0;
 		for (var sentence2 in sentences) {
-			if (sentence1 != sentence2) {
-				score += calculateIntersect(sentence1, sentence2);
+			if (sentences[sentence1] != sentences[sentence2]) {
+				score += calculateIntersect(sentences[sentence1], sentences[sentence2]);
 			}
 		}
-		sentDict[sentence1] = score;
+		sentDict[sentences[sentence1]] = score;
 	}
 	var items = Object.keys(sentDict).map(function(key) {
 	    return [key, sentDict[key]];
@@ -44,20 +48,24 @@ function summarizeHelper(sentences, x) {
 	    return first[1] - second[1];
 	});
 
-	// Create a new array with only the first 5 items
 	var newArr = items.slice(0, x);
+	console.log("newArr " + newArr);
 	var resultArr = [];
 	for (var miniArr in newArr) {
-		resultArr.push(miniArr[0])
+		resultArr.push(newArr[miniArr][0]);
 	}
-	return resultArr
+	return resultArr;
 }
 
 function calculateIntersect(sentence1, sentence2) {
 	var wordsArr1 = sentence1.split(" ");
 	var wordsArr2 = sentence2.split(" ");
+	// console.log("wordsArr1 unsorted: " + wordsArr1);
+	// console.log("wordsArr2 unsorted: " + wordsArr2);
 	wordsArr1 = mergeSort(wordsArr1);
 	wordsArr2 = mergeSort(wordsArr2);
+	// console.log("wordsArr1 sorted: " + wordsArr1);
+	// console.log("wordsArr2 sorted: " + wordsArr2);
 	var i = 0;
 	var j = 0;
 	var countIntersect = 0;
