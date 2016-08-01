@@ -1,12 +1,16 @@
-//1. Identify text units that best define task at hand and add them as vertices in graph
-//2. Identify relations that connect such text units and use these relations to draw edges between vertices in graph. Edges can be directed/undirected, unweighted/weighted
-//3. Iterate the graph based ranking algorithm till convergence
-//4. Sort vertices based on final score. use values attached to each vertex for ranking/selection decisions 
+//Summarize items based on algorithm read from https://thetokenizer.com/2013/04/28/build-your-own-summary-tool/
 
 exports.summarizeText = function summarizeText(rawText) {
 	try{
 		var result = "";
-
+		var textToSum = [];
+		for (var item in rawText) {
+			textToSum.push(summarizeParagraph(item));
+		}
+		var resultsArr = summarizeHelper(textToSum, Math.floor(textToSum.length / 3));
+		for (var sumSent in resultsArr) {
+			result += sumSent;
+		}
 		return result;
 	} catch(err) {
 		return "FAIL";
@@ -14,20 +18,67 @@ exports.summarizeText = function summarizeText(rawText) {
 }
 
 function summarizeParagraph(paragraph) {
+	var sentences = paragraph.split(".");
+	if (sentences.length < 2) {
+		return paragraph;
+	}
+	return summarizeHelper(sentences, 1)[0];
 
+function summarizeHelper(sentences, x) {
+	var sentDict = {};
+	for (var sentence1 in sentences) {
+		var score = 0;
+		for (var sentence2 in sentences) {
+			if (sentence1 != sentence2) {
+				score += calculateIntersect(sentence1, sentence2);
+			}
+		}
+		sentDict[sentence1] = score;
+	}
+	var items = Object.keys(sentDict).map(function(key) {
+	    return [key, sentDict[key]];
+	});
 
+	// Sort the array based on the second element
+	items.sort(function(first, second) {
+	    return first[1] - second[1];
+	});
+
+	// Create a new array with only the first 5 items
+	var newArr = items.slice(0, x);
+	var resultArr = [];
+	for (var miniArr in newArr) {
+		resultArr.push(miniArr[0])
+	}
+	return resultArr
 }
 
 function calculateIntersect(sentence1, sentence2) {
 	var wordsArr1 = sentence1.split(" ");
 	var wordsArr2 = sentence2.split(" ");
-	mergeSort(wordsArr1);
-	mergeSort(wordsArr2);
+	wordsArr1 = mergeSort(wordsArr1);
+	wordsArr2 = mergeSort(wordsArr2);
+	var i = 0;
+	var j = 0;
+	var countIntersect = 0;
+	while (i < wordsArr1.length && j < wordsArr2.length) {
+		if (wordsArr1[i] === wordsArr2[j]) {
+			countIntersect += 1;
+			i++;
+			j++;
+		}
+		else if (wordsArr1[i].localeCompare(wordsArr2[j]) == -1) {
+			i++;
+		} else {
+			j++;
+		}
+	}
+	return countIntersect / ((wordsArr1.length + wordsArr2.length) / 2);
 }
 
 function mergeSort(array) {
 	if (array.length < 2) {
-		return array
+		return array;
 	}
 	var mid =  Math.floor(array.length / 2);
 	var firstHalf = array.slice(0, mid);
@@ -36,7 +87,7 @@ function mergeSort(array) {
 	var sortedSecond = mergeSort(secondHalf);
 	var i = 0;
 	var j = 0;
-	var result = []
+	var result = [];
 	while (sortedFirst.length > i && sortedSecond.length > j) {
 		if (sortedFirst[i].localeCompare(sortedSecond[j]) == -1) {
 			result.push(sortedFirst[i]);
@@ -52,5 +103,5 @@ function mergeSort(array) {
 	if (j == sortedSecond.length) {
 		result.push.apply(result, sortedFirst)
 	}
-	return result
+	return result;
 }
