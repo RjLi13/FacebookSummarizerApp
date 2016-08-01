@@ -11,7 +11,7 @@ exports.summarizeText = function summarizeText(rawText) {
 		var resultsArr = summarizeHelper(textToSum, Math.floor(textToSum.length / 3));
 		for (var sumSent in resultsArr) {
 			result += resultsArr[sumSent];
-			result += ". ";
+			result += "\n";
 		}
 		return result;
 	} catch(err) {
@@ -20,8 +20,8 @@ exports.summarizeText = function summarizeText(rawText) {
 }
 
 function summarizeParagraph(paragraph) {
-	var sentences = paragraph.split(".");
-	console.log("Sentences Array is: " + sentences);
+	var sentences = paragraph.split(/[\\.!?]/);
+	// console.log("Sentences Array is: " + sentences);
 	if (sentences.length < 2) {
 		return paragraph;
 	}
@@ -45,7 +45,7 @@ function summarizeHelper(sentences, x) {
 
 	// Sort the array based on the second element
 	items.sort(function(first, second) {
-	    return first[1] - second[1];
+	    return second[1] - first[1];
 	});
 
 	var newArr = items.slice(0, x);

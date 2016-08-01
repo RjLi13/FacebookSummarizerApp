@@ -23,6 +23,7 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 	              	api.sendMessage("Ok...", event.threadID);
 	              	var result = textrank.summarizeText(rawText);
 	              	api.sendMessage(result, event.threadID);
+	              	//console.log(result);
 	              	return stopListening();
 	            }
 	            // I'm not sure when to split a sentence. Whether by punctuation enders or the end of a message
@@ -30,8 +31,7 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 	            rawText.push(event.body);
 	            break;
 	        case "event":
-	            rawText.push(event.logMessageType);
-	            rawText.push(event.logMessageBody);
+	            rawText.push(event.logMessageType + ", " + event.logMessageBody);
 	            break;
         }
     });
