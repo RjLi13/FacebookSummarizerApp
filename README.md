@@ -6,4 +6,6 @@ It requires node module and facebook-chat-api module. First it reads the usernam
 
 This application is built using Facebook Chat API https://github.com/Schmavery/facebook-chat-api/blob/master/DOCS.md#getThreadList and the algorithm elaborated here: https://thetokenizer.com/2013/04/28/build-your-own-summary-tool/, which itself was based on Textrank.
 
+I implemented the algorithm listed in the url, but with a few additional changes. First I picked the most important sentence from a paragraph. To do this, I recognized a paragraph as a single message with 2 or more sentences and separated sentences by punctuation. Then given these important sentences, I took the current number of sentences/3 top ranked sentences and built a message around it to send.
+
 Try it out today!
