@@ -2,25 +2,21 @@
 
 exports.summarizeText = function summarizeText(rawText) {
 	try{
-		// console.log("text to summarize: " + rawText);
-		var result = "";
+		console.log("text to summarize: " + rawText);
 		var textToSum = [];
 		for (var item in rawText) {
 			textToSum.push.apply(textToSum, summarizeParagraph(rawText[item]));
 		}
 		var resultsArr = summarizeHelper(textToSum, Math.floor(textToSum.length / 3));
-		for (var i = 0; i < resultsArr.length; i++) {
-			result += resultsArr[i];
-			result += "\n";
-		}
-		return result;
+		return resultsArr;
 	} catch(err) {
+		console.log(err);
 		return "FAIL";
 	}
 }
 
 function summarizeParagraph(paragraph) {
-	var sentences = paragraph.split(/[\\.!?]/).filter(Boolean);
+	var sentences = paragraph.split(/[\\.!\?]/).filter(Boolean);
 	// console.log("Sentences Array is: " + sentences);
 	if (sentences.length < 3) {
 		return sentences;
@@ -58,8 +54,8 @@ function summarizeHelper(sentences, x) {
 }
 
 function calculateIntersect(sentence1, sentence2) {
-	var wordsArr1 = sentence1.split(/[ ,;:]+/).filter(Boolean);
-	var wordsArr2 = sentence2.split(/[ ,;:]+/).filter(Boolean);
+	var wordsArr1 = sentence1.split(/[ ,;:.!?*^#()$&@\-+=\_~]+/).filter(Boolean);
+	var wordsArr2 = sentence2.split(/[ ,;:.!?*^#()$&@\-+=\_~]+/).filter(Boolean);
 	// console.log("wordsArr1 unsorted: " + wordsArr1);
 	// console.log("wordsArr2 unsorted: " + wordsArr2);
 	wordsArr1 = mergeSort(wordsArr1);

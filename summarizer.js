@@ -15,7 +15,6 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
     api.setOptions({listenEvents: true, selfListen: true});
  	var rawText = [];
  	var senderDict = {};
- 	var threadDict = {}; 
     var stopListening = api.listen(function(err, event) {
         if(err) return console.error(err);
  		
@@ -23,33 +22,67 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
           	case "message":
 	            if(event.body === '/summarizepls') {
 	              	api.sendMessage("Ok...", event.threadID);
-	              	for (var key in senderDict) {
-	              		if (senderDict.hasOwnProperty(key)) {
-						    console.log(key);
-						}
-	              	}
-	              	for (var key2 in threadDict) {
-	              		if (senderDict.hasOwnProperty(key2)) {
-						    console.log(key2);
-						}
-	              	}
-	              	var result = textrank.summarizeText(rawText);
-	              	api.sendMessage(result, event.threadID);
-	              	//console.log("Summary of backlog: " + result);
+	     //          	console.log("senderDict");
+	     //          	for (var key in senderDict) {
+	     //          		if (senderDict.hasOwnProperty(key)) {
+						//     console.log(key);
+						// }
+	     //          	}
+
+	              	api.getUserInfo(Object.keys(senderDict), function(err, info) {
+	              		if(err) return console.error(err);
+	      //         		console.log("senderDict in needed");
+	              		var userDict = {};
+		              	for (var key in senderDict) {
+		              		if (senderDict.hasOwnProperty(key)) {
+							    if (key in info) {
+							    	userDict[info[key]["name"]] = senderDict[key];
+							    }
+							}
+		              	}
+		              	// console.log("userDict in needed");
+		              	// for (var key2 in userDict) {
+		              	// 	if (userDict.hasOwnProperty(key2)) {
+		              	// 		console.log(userDict[key2]);
+		              	// 	}
+		              	// }
+		    			var result = "\n";
+		              	var resultsArr = textrank.summarizeText(rawText);
+		              	console.log("Debug information: Not necessary to read");
+		              	console.log(resultsArr);
+		              	var currentName = "";
+		              	for (var key3 in userDict) {
+		              		if (userDict.hasOwnProperty(key3)) {
+		              			for (var j = 0; j < userDict[key3].length; j++) {
+		              				for (var i = 0; i < resultsArr.length; i++) {
+			              				if (resultsArr[i] === userDict[key3][j]) {
+			              					if (currentName != key3) {
+				              					result += key3 + " said: ";
+				              					result += resultsArr[i];
+												result += "\n";
+												currentName = key3;
+											} else {
+												result += resultsArr[i];
+												result += "\n";
+											}
+			              				}
+									}
+		              			}
+		              		}
+		              	}
+		              	api.sendMessage(result, event.threadID);
+		              	console.log("Summary of backlog: " + result);
+	              	});
 	              	return stopListening();
 	            }
 	            // I'm not sure when to split a sentence. Whether by punctuation enders or the end of a message
 	            // For now its the end of a message
 	            rawText.push(event.body);
+	            var msgArr = event.body.split(/[\\.!\?]/).filter(Boolean);
 	            if (event.senderID in senderDict) {
-	            	senderDict[event.senderID].push(event.body);
+	            	senderDict[event.senderID].push.apply(senderDict[event.senderID], msgArr);
 	            } else {
-	            	senderDict[event.senderID] = [event.body];
-	            }
-	            if (event.threadID in threadDict) {
-	            	threadDict[event.threadID].push(event.body);
-	            } else {
-	            	threadDict[event.threadID] = [event.body];
+	            	senderDict[event.senderID] = msgArr;
 	            }
 	            break;
 	        case "event":

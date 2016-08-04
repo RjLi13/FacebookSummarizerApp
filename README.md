@@ -1,5 +1,8 @@
 # FacebookSummarizerApp
 
+UPDATE 8/3/2016- Prints to console instead of outputting onto chat, Now can display who said the message!
+
+
 Tired of reading a backlog of messages? Then this app would work prefectly for you! This application summarizes the messages your friends say to you from the point where you run the application up til you type the command to summarize the backlog of messages you missed.
 
 It requires node module and facebook-chat-api module. First it reads the username.txt and password.txt for facebook credentials, then it logins into facebook in the background, waits and listens to messages on the current thread you are on, until you type "/summarizepls", which then allows it to summarize all the messages it listened to using a summarizer algorithm more naive then the textrank algorithm. Then it prints that message into the thread.
