@@ -2,7 +2,7 @@
 
 exports.summarizeText = function summarizeText(rawText) {
 	try{
-		console.log("text to summarize: " + rawText);
+		// console.log("text to summarize: " + rawText);
 		var result = "";
 		var textToSum = [];
 		for (var item in rawText) {
