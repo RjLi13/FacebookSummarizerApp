@@ -15,6 +15,7 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
     api.setOptions({listenEvents: true, selfListen: true});
  	var rawText = [];
  	var senderDict = {};
+ 	var threadDict = {};
     var stopListening = api.listen(function(err, event) {
         if(err) return console.error(err);
  		
@@ -47,15 +48,30 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 			              	// 		console.log(userDict[key2]);
 			              	// 	}
 			              	// }
-			    			var result = "\n";
+			    			var result = "";
 			              	var resultsArr = textrank.summarizeText(rawText);
 			              	console.log("Debug information: Not necessary to read");
 			              	console.log(resultsArr);
 			              	var currentName = "";
-			              	for (var key3 in userDict) {
-			              		if (userDict.hasOwnProperty(key3)) {
-			              			for (var j = 0; j < userDict[key3].length; j++) {
-			              				for (var i = 0; i < resultsArr.length; i++) {
+			              	var currentThread = "";
+			              	for (var i = 0; i < resultsArr.length; i++) {
+				              	for (var thread in threadDict) {
+				              		if (threadDict.hasOwnProperty(thread)) {
+			              				for (var k = 0; k < threadDict[thread].length; k++) {
+			              					if (resultsArr[i] === threadDict[thread][k]) {
+			              						if (currentThread != thread) {
+			              							result += "\n\nThread num: " + thread + "\n";
+			              							currentThread = thread;
+			              						}
+			        							break;
+			              					}
+			              				}
+			      						break;
+			      					}
+			      				}
+	              				for (var key3 in userDict) {
+				              		if (userDict.hasOwnProperty(key3)) {
+			              				for (var j = 0; j < userDict[key3].length; j++) {
 				              				if (resultsArr[i] === userDict[key3][j]) {
 				              					if (currentName != key3) {
 					              					result += key3 + " said: ";
@@ -66,12 +82,15 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 													result += resultsArr[i];
 													result += "\n";
 												}
+												break;
 				              				}
 										}
+										break;
 			              			}
 			              		}
-			              	}
-			              	api.sendMessage(result, event.threadID);
+			              	} 
+			              	// api.sendMessage(result, event.threadID);
+			              	console.log("\nTo look for which thread, go to messenger.com and look at url, the number is the threadID.\n");
 			              	console.log("Summary of backlog: " + result);
 		              	});
 		              	return stopListening();
@@ -84,6 +103,11 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 		            	senderDict[event.senderID].push.apply(senderDict[event.senderID], msgArr);
 		            } else {
 		            	senderDict[event.senderID] = msgArr;
+		            }
+		            if (event.threadID in threadDict) {
+		            	threadDict[event.threadID].push.apply(threadDict[event.threadID], msgArr);
+		            } else {
+		            	threadDict[event.threadID] = msgArr;
 		            }
 		        } else {
 		        	console.log("Sorry we don't support whatever is being sent");
