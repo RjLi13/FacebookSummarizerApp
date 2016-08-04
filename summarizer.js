@@ -24,16 +24,10 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
           		if (event.body) {
 		            if(event.body === '/summarizepls') {
 		              	api.sendMessage("Ok...", event.threadID);
-		     //          	console.log("senderDict");
-		     //          	for (var key in senderDict) {
-		     //          		if (senderDict.hasOwnProperty(key)) {
-							//     console.log(key);
-							// }
-		     //          	}
-
 		              	api.getUserInfo(Object.keys(senderDict), function(err, info) {
 		              		if(err) return console.error(err);
-		      //         		console.log("senderDict in needed");
+		      				// console.log(senderDict);
+		      				// console.log(threadDict);
 		              		var userDict = {};
 			              	for (var key in senderDict) {
 			              		if (senderDict.hasOwnProperty(key)) {
@@ -42,16 +36,11 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 								    }
 								}
 			              	}
-			              	// console.log("userDict in needed");
-			              	// for (var key2 in userDict) {
-			              	// 	if (userDict.hasOwnProperty(key2)) {
-			              	// 		console.log(userDict[key2]);
-			              	// 	}
-			              	// }
+			              	// console.log(userDict);
 			    			var result = "";
 			              	var resultsArr = textrank.summarizeText(rawText);
-			              	console.log("Debug information: Not necessary to read");
-			              	console.log(resultsArr);
+			              	// console.log("Debug information: Not necessary to read");
+			              	// console.log(resultsArr);
 			              	var currentName = "";
 			              	var currentThread = "";
 			              	for (var i = 0; i < resultsArr.length; i++) {
@@ -69,19 +58,16 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 			      						break;
 			      					}
 			      				}
-	              				for (var key3 in userDict) {
-				              		if (userDict.hasOwnProperty(key3)) {
-			              				for (var j = 0; j < userDict[key3].length; j++) {
-				              				if (resultsArr[i] === userDict[key3][j]) {
-				              					if (currentName != key3) {
-					              					result += key3 + " said: ";
-					              					result += resultsArr[i];
-													result += "\n";
-													currentName = key3;
-												} else {
-													result += resultsArr[i];
-													result += "\n";
+	              				for (var user in userDict) {
+				              		if (userDict.hasOwnProperty(user)) {
+			              				for (var j = 0; j < userDict[user].length; j++) {
+				              				if (resultsArr[i] === userDict[user][j]) {
+				              					if (currentName != user) {
+					              					result += user + " said: ";
+													currentName = user;
 												}
+												result += resultsArr[i];
+												result += "\n";
 												break;
 				              				}
 										}
@@ -92,23 +78,36 @@ login({email: FB_EMAIL, password: FB_PASSWORD}, function callback (err, api) {
 			              	// api.sendMessage(result, event.threadID);
 			              	console.log("\nTo look for which thread, go to messenger.com and look at url, the number is the threadID.\n");
 			              	console.log("Summary of backlog: " + result);
+			              	rawText = [];
+			              	senderDict = {};
+ 							threadDict = {};
 		              	});
-		              	return stopListening();
+		              	//For only running program once
+		              	// return stopListening();
 		            }
-		            // I'm not sure when to split a sentence. Whether by punctuation enders or the end of a message
-		            // For now its the end of a message
 		            rawText.push(event.body);
-		            var msgArr = event.body.split(/[\\.!\?]/).filter(Boolean);
+		            // console.log(rawText);
+
+		            var msgArrSender = event.body.split(/[\\.!\?]/).filter(Boolean);
+		            var msgArrThread = event.body.split(/[\\.!\?]/).filter(Boolean);
+		            // console.log("Event.senderID: " + event.senderID);
+		            // console.log("Event.threadID: " + event.threadID);
 		            if (event.senderID in senderDict) {
-		            	senderDict[event.senderID].push.apply(senderDict[event.senderID], msgArr);
+		            	var sendArr = senderDict[event.senderID]
+		            	// console.log(sendArr);
+		            	sendArr.push.apply(sendArr, msgArrSender);
 		            } else {
-		            	senderDict[event.senderID] = msgArr;
+		            	senderDict[event.senderID] = msgArrSender;
 		            }
+		            // console.log(senderDict);
 		            if (event.threadID in threadDict) {
-		            	threadDict[event.threadID].push.apply(threadDict[event.threadID], msgArr);
+		            	var threadArr = threadDict[event.threadID]
+		            	// console.log(threadArr);
+		            	threadArr.push.apply(threadArr, msgArrThread);
 		            } else {
-		            	threadDict[event.threadID] = msgArr;
+		            	threadDict[event.threadID] = msgArrThread;
 		            }
+		            // console.log(threadDict);
 		        } else {
 		        	console.log("Sorry we don't support whatever is being sent");
 		        }
